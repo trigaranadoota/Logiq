@@ -18,6 +18,18 @@ const challenges = [
     image: PlaceHolderImages.find((img) => img.id === "aptitude-sprint"),
     href: "/challenge/aptitude-sprint",
   },
+  {
+    id: "number-series",
+    title: "Number Series Duel",
+    image: PlaceHolderImages.find((img) => img.id === "number-series"),
+    href: "/duel/1/results",
+  },
+  {
+    id: "speed-time",
+    title: "Speed & Time Trial",
+    image: PlaceHolderImages.find((img) => img.id === "speed-time"),
+    href: "/duel/2/results",
+  },
 ];
 
 export function TodayChallenge() {

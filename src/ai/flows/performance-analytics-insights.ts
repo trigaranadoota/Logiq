@@ -11,8 +11,8 @@
  * @exported PerformanceAnalyticsOutput - The TypeScript interface for the output schema.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 // Define the input schema for the performance analytics flow
 const PerformanceAnalyticsInputSchema = z.object({
@@ -44,7 +44,7 @@ const performanceAnalyticsFlow = ai.defineFlow(
     outputSchema: PerformanceAnalyticsOutputSchema,
   },
   async input => {
-    const {output} = await summarizePerformancePrompt(input);
+    const { output } = await summarizePerformancePrompt(input);
     return output!;
   }
 );
@@ -52,8 +52,8 @@ const performanceAnalyticsFlow = ai.defineFlow(
 // Define the prompt for summarizing performance analytics
 const summarizePerformancePrompt = ai.definePrompt({
   name: 'summarizePerformancePrompt',
-  input: {schema: PerformanceAnalyticsInputSchema},
-  output: {schema: PerformanceAnalyticsOutputSchema},
+  input: { schema: PerformanceAnalyticsInputSchema },
+  output: { schema: PerformanceAnalyticsOutputSchema },
   prompt: `You are an AI that analyzes match performance data and provides the most important insights to the user.
 
   Here's the match data:
@@ -79,5 +79,20 @@ const summarizePerformancePrompt = ai.definePrompt({
  * @returns A promise that resolves to the AI-generated insights.
  */
 export async function performanceAnalyticsInsights(input: PerformanceAnalyticsInput): Promise<PerformanceAnalyticsOutput> {
-  return performanceAnalyticsFlow(input);
+  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === 'MISSING_API_KEY') {
+    return {
+      insights: "Great match! Keep focusing on your speed and accuracy to continue climbing the ranks.",
+    };
+  }
+
+  try {
+    return await performanceAnalyticsFlow(input);
+  } catch (error) {
+    console.error('AI Insights Error:', error);
+    return {
+      insights: "Excellent performance in this duel. Review your speed data to find more opportunities for improvement.",
+    };
+  }
 }

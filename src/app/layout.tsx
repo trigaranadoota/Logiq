@@ -3,9 +3,11 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Logic Arena',
-  description: 'Aptitude & Logical Reasoning Duel App',
+  title: 'Logiq',
+  description: 'Master Your Cognitive Superiority',
 };
+
+import { NavigationProvider } from '@/components/providers/navigation-provider';
 
 export default function RootLayout({
   children,
@@ -23,7 +25,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <NavigationProvider>
+          {children}
+        </NavigationProvider>
         <Toaster />
       </body>
     </html>

@@ -9,33 +9,33 @@ import { cn } from '@/lib/utils';
 
 // Mock Data
 const users = [
-  { id: 'alex_g', name: 'Alex_G', avatar: 'https://picsum.photos/seed/opponent/150/150', lastMessage: 'See you there!', time: '10:42 AM', unread: 2 },
-  { id: 'charlie_ux', name: 'Charlie', avatar: 'https://picsum.photos/seed/charlie/150/150', lastMessage: 'Sounds good!', time: '9:30 AM', unread: 0 },
-  { id: 'bob_codes', name: 'Bob', avatar: 'https://picsum.photos/seed/bob/150/150', lastMessage: 'Haha, true!', time: 'Yesterday', unread: 0 },
-  { id: 'alice_dev', name: 'Alice', avatar: 'https://picsum.photos/seed/alice/150/150', lastMessage: 'Got it, thanks!', time: 'Yesterday', unread: 0 },
+    { id: 'alex_g', name: 'Alex_G', avatar: 'https://picsum.photos/seed/opponent/150/150', lastMessage: 'See you there!', time: '10:42 AM', unread: 2 },
+    { id: 'charlie_ux', name: 'Charlie', avatar: 'https://picsum.photos/seed/charlie/150/150', lastMessage: 'Sounds good!', time: '9:30 AM', unread: 0 },
+    { id: 'bob_codes', name: 'Bob', avatar: 'https://picsum.photos/seed/bob/150/150', lastMessage: 'Haha, true!', time: 'Yesterday', unread: 0 },
+    { id: 'alice_dev', name: 'Alice', avatar: 'https://picsum.photos/seed/alice/150/150', lastMessage: 'Got it, thanks!', time: 'Yesterday', unread: 0 },
 ];
 
 const messagesData = {
-  alex_g: [
-    { id: 1, sender: 'alex_g', text: 'Hey, ready for the rematch?' },
-    { id: 2, sender: 'me', text: 'You know it! Bringing my A-game this time.' },
-    { id: 3, sender: 'alex_g', text: 'We\'ll see about that. I\'ve been practicing.' },
-    { id: 4, sender: 'alex_g', text: 'Same time tomorrow?' },
-    { id: 5, sender: 'me', text: 'Perfect. See you there!' },
-  ],
-  charlie_ux: [
-    { id: 1, sender: 'charlie_ux', text: 'Can you review the latest design?' },
-    { id: 2, sender: 'me', text: 'On it. Will send feedback shortly.' },
-    { id: 3, sender: 'charlie_ux', text: 'Sounds good!' },
-  ],
-  bob_codes: [
-    { id: 1, sender: 'bob_codes', text: 'Found a weird bug on the results page.' },
-    { id: 2, sender: 'me', text: 'Oh? What\'s happening?' },
-  ],
-  alice_dev: [
-     { id: 1, sender: 'alice_dev', text: 'Hey, I pushed the latest changes for the feed.' },
-     { id: 2, sender: 'me', text: 'Great, I\'ll pull and check it out.' },
-  ]
+    alex_g: [
+        { id: 1, sender: 'alex_g', text: 'Hey, ready for the rematch?' },
+        { id: 2, sender: 'me', text: 'You know it! Bringing my A-game this time.' },
+        { id: 3, sender: 'alex_g', text: 'We\'ll see about that. I\'ve been practicing.' },
+        { id: 4, sender: 'alex_g', text: 'Same time tomorrow?' },
+        { id: 5, sender: 'me', text: 'Perfect. See you there!' },
+    ],
+    charlie_ux: [
+        { id: 1, sender: 'charlie_ux', text: 'Can you review the latest design?' },
+        { id: 2, sender: 'me', text: 'On it. Will send feedback shortly.' },
+        { id: 3, sender: 'charlie_ux', text: 'Sounds good!' },
+    ],
+    bob_codes: [
+        { id: 1, sender: 'bob_codes', text: 'Found a weird bug on the results page.' },
+        { id: 2, sender: 'me', text: 'Oh? What\'s happening?' },
+    ],
+    alice_dev: [
+        { id: 1, sender: 'alice_dev', text: 'Hey, I pushed the latest changes for the feed.' },
+        { id: 2, sender: 'me', text: 'Great, I\'ll pull and check it out.' },
+    ]
 };
 
 type User = typeof users[0];
@@ -43,9 +43,41 @@ type User = typeof users[0];
 export default function MessagesPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [messages, setMessages] = useState(messagesData);
+    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+    const [inputValue, setInputValue] = useState('');
 
     const filteredUsers = users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const messages = selectedUser ? messagesData[selectedUser.id as keyof typeof messagesData] || [] : [];
+
+    const currentMessages = selectedUser ? messages[selectedUser.id as keyof typeof messages] || [] : [];
+
+    const handleDeleteMessage = (messageId: number) => {
+        if (!selectedUser) return;
+
+        const userId = selectedUser.id as keyof typeof messages;
+        setMessages(prev => ({
+            ...prev,
+            [userId]: prev[userId].filter(m => m.id !== messageId)
+        }));
+        setSelectedMessageId(null);
+    };
+
+    const handleSendMessage = () => {
+        if (!inputValue.trim() || !selectedUser) return;
+
+        const userId = selectedUser.id as keyof typeof messages;
+        const newMessage = {
+            id: Date.now(),
+            sender: 'me',
+            text: inputValue.trim()
+        };
+
+        setMessages(prev => ({
+            ...prev,
+            [userId]: [...(prev[userId] || []), newMessage]
+        }));
+        setInputValue('');
+    };
 
 
     return (
@@ -56,11 +88,11 @@ export default function MessagesPage() {
                 selectedUser ? "hidden md:flex" : "flex"
             )}>
                 <div className="p-4 border-b border-border">
-                    <h1 className="text-2xl font-headline">Requests</h1>
+                    <h1 className="text-2xl font-headline tracking-tight uppercase italic">Requests</h1>
                     <div className="relative mt-4">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                            placeholder="Search messages..." 
+                        <Input
+                            placeholder="Search messages..."
                             className="pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -123,13 +155,13 @@ export default function MessagesPage() {
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 p-6 overflow-y-auto space-y-6">
-                            {messages.map((message, index) => (
+                        <div className="flex-1 p-6 overflow-y-auto space-y-6" onClick={() => setSelectedMessageId(null)}>
+                            {currentMessages.map((message, index) => (
                                 <div
-                                    key={index}
+                                    key={message.id}
                                     className={cn(
-                                        "flex gap-3",
-                                        message.sender === 'me' ? 'justify-end' : 'justify-start'
+                                        "flex gap-3 items-end group",
+                                        message.sender === 'me' ? 'flex-row-reverse' : 'flex-row'
                                     )}
                                 >
                                     {message.sender !== 'me' && (
@@ -138,15 +170,41 @@ export default function MessagesPage() {
                                             <AvatarFallback>{selectedUser.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                     )}
-                                    <div
-                                        className={cn(
-                                            "max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl text-sm",
-                                            message.sender === 'me'
-                                                ? 'bg-primary text-primary-foreground rounded-br-none'
-                                                : 'bg-muted rounded-bl-none'
+                                    <div className="relative">
+                                        <div
+                                            onDoubleClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedMessageId(message.id);
+                                            }}
+                                            className={cn(
+                                                "max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl text-sm transition-all duration-200 cursor-pointer select-none",
+                                                message.sender === 'me'
+                                                    ? 'bg-primary text-primary-foreground rounded-br-none'
+                                                    : 'bg-muted rounded-bl-none',
+                                                selectedMessageId === message.id && 'ring-2 ring-primary ring-offset-2 opacity-90'
+                                            )}
+                                        >
+                                            {message.text}
+                                        </div>
+
+                                        {selectedMessageId === message.id && (
+                                            <div className={cn(
+                                                "absolute -top-12 flex bg-popover border border-border rounded-lg shadow-xl p-1 z-10 animate-in fade-in zoom-in duration-200",
+                                                message.sender === 'me' ? 'right-0' : 'left-0'
+                                            )}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-8 px-3"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteMessage(message.id);
+                                                    }}
+                                                >
+                                                    Delete {message.sender === 'me' ? 'for everyone' : 'for me'}
+                                                </Button>
+                                            </div>
                                         )}
-                                    >
-                                        {message.text}
                                     </div>
                                 </div>
                             ))}
@@ -154,21 +212,34 @@ export default function MessagesPage() {
 
                         {/* Chat Input */}
                         <div className="p-4 border-t border-border bg-background">
-                            <div className="relative">
+                            <form
+                                className="relative"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSendMessage();
+                                }}
+                            >
                                 <Input
                                     placeholder="Type a message..."
                                     className="pr-12 h-12 text-base"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
                                 />
-                                <Button size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9">
+                                <Button
+                                    type="submit"
+                                    size="icon"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9"
+                                    disabled={!inputValue.trim()}
+                                >
                                     <Send className="h-4 w-4" />
                                 </Button>
-                            </div>
+                            </form>
                         </div>
                     </>
                 ) : (
                     <div className="flex-1 flex-col items-center justify-center text-center hidden md:flex">
                         <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
-                        <h2 className="text-2xl font-semibold">Select a conversation</h2>
+                        <h2 className="text-4xl font-headline tracking-tight uppercase italic">Select a conversation</h2>
                         <p className="text-muted-foreground mt-2">Choose from your existing conversations to start chatting.</p>
                     </div>
                 )}
