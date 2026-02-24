@@ -21,18 +21,15 @@ interface ChallengeLayoutProps {
 export function ChallengeLayout({ children }: ChallengeLayoutProps) {
     const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
-    // Track whether the user confirmed leaving so we don't re-intercept
     const isLeavingRef = useRef(false);
 
     useEffect(() => {
-        // Push a dummy state so we can intercept the first "back" press
+        // Push a dummy state so popstate fires when back is pressed
         history.pushState(null, '', window.location.href);
 
         const handlePopState = () => {
             if (isLeavingRef.current) return;
-            // Re-push dummy state to prevent leaving
-            history.pushState(null, '', window.location.href);
-            // Show the confirmation dialog
+            // Show the dialog — at this point history moved back by 1 (from dummy to real page)
             setDialogOpen(true);
         };
 
@@ -40,22 +37,27 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
+    const handleCancel = () => {
+        // Re-arm the guard by pushing the dummy state again
+        history.pushState(null, '', window.location.href);
+        setDialogOpen(false);
+    };
+
     const handleLeave = () => {
         isLeavingRef.current = true;
-        // Go back twice: once for the dummy state, once for real navigation
-        history.go(-2);
+        // Replace current history entry with /arena so back never returns to this challenge
+        router.replace('/arena');
     };
 
     return (
         <div className="container mx-auto px-4 py-8">
-            {/* Confirmation Dialog — triggered by both the Back button and browser back */}
-            <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <AlertDialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleCancel(); }}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Want to leave this challenge?</AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleLeave}>Leave</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
