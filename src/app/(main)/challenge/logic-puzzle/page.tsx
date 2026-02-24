@@ -1,48 +1,14 @@
 'use client';
 
-import { BrainCircuit, ArrowLeft } from 'lucide-react';
+import { BrainCircuit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogFooter,
-} from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
+import { ChallengeLayout } from '@/components/challenge/challenge-layout';
 
 export default function LogicPuzzlePage() {
-  const router = useRouter();
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-start w-full max-w-3xl mx-auto">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Want to leave this challenge?</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => router.back()}>
-                Leave
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-
+    <ChallengeLayout>
       <div className="text-center flex flex-col items-center justify-center pt-8">
         <BrainCircuit className="w-20 h-20 text-primary mb-4" />
         <h1 className="text-5xl font-headline text-foreground mb-2">
@@ -83,6 +49,6 @@ export default function LogicPuzzlePage() {
           </Button>
         </div>
       </div>
-    </div>
+    </ChallengeLayout>
   );
 }
