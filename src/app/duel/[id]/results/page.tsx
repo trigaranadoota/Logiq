@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SpeedChart } from "@/components/analytics/speed-chart";
@@ -5,8 +9,20 @@ import { StatsTable } from "@/components/analytics/stats-table";
 import AiInsights from "@/components/analytics/ai-insights";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { MatchmakingOverlay } from "@/components/dashboard/matchmaking-overlay";
 
 export default function ResultsPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const [isMatchmaking, setIsMatchmaking] = useState(false);
+
+  // Map descriptive ID to numeric seed for consistent random data
+  const idSeedMap: Record<string, number> = {
+    "logic-puzzle": 1,
+    "aptitude-sprint": 2,
+    "number-series": 3,
+    "speed-time": 4,
+  };
+  const numericId = idSeedMap[params.id] || 1;
 
   // Mock data for the duel results
   const yourData = {
@@ -28,8 +44,8 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
   };
 
   // Generate consistent random data based on duel ID
-  const yourSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.sin((i + parseInt(params.id, 10)) * 0.5) * 10 + 90));
-  const opponentSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.cos((i + parseInt(params.id, 10)) * 0.4) * 12 + 88));
+  const yourSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.sin((i + numericId) * 0.5) * 10 + 90));
+  const opponentSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.cos((i + numericId) * 0.4) * 12 + 88));
 
   const yourStats = {
     avgTime: 2.5,
@@ -59,8 +75,21 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
   const won = matchData.yourScore > matchData.opponentScore;
 
+  const handleRematch = () => {
+    setIsMatchmaking(true);
+    // Simulate matchmaking delay before navigating back to the challenge
+    setTimeout(() => {
+      router.push(`/challenge/${params.id}`);
+    }, 2500);
+  };
+
   return (
     <div className="bg-background">
+      <MatchmakingOverlay
+        gameId={params.id}
+        gameTitle={params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+        isVisible={isMatchmaking}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
         {/* Header: Victory/Loss */}
         <Card className="text-center p-6 md:p-8 bg-card">
@@ -120,7 +149,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
         </Card>
 
         <div className="flex justify-center gap-4 pt-4">
-          <Button variant="outline" className="rounded-full px-8">Rematch</Button>
+          <Button onClick={handleRematch} variant="outline" className="rounded-full px-8">Rematch</Button>
           <Button asChild className="rounded-full px-8">
             <Link href="/arena">Back to Arena</Link>
           </Button>

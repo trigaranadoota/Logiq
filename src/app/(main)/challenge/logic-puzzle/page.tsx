@@ -45,7 +45,7 @@ export default function LogicPuzzlePage() {
         </Card>
         <div className="mt-8">
           <Button asChild size="lg" className="rounded-full px-12">
-            <Link href="/duel/1/results">Submit & See Results</Link>
+            <Link href="/duel/logic-puzzle/results">Submit & See Results</Link>
           </Button>
         </div>
       </div>

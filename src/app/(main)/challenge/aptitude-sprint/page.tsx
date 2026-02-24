@@ -45,7 +45,7 @@ export default function AptitudeSprintPage() {
         </Card>
         <div className="mt-8">
           <Button asChild size="lg" className="rounded-full px-12">
-            <Link href="/duel/2/results">Submit & See Results</Link>
+            <Link href="/duel/aptitude-sprint/results">Submit & See Results</Link>
           </Button>
         </div>
       </div>

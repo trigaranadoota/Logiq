@@ -44,7 +44,7 @@ export default function NumberSeriesPage() {
                 </Card>
                 <div className="mt-8">
                     <Button asChild size="lg" className="rounded-full px-12">
-                        <Link href="/duel/1/results">Submit & See Results</Link>
+                        <Link href="/duel/number-series/results">Submit & See Results</Link>
                     </Button>
                 </div>
             </div>
