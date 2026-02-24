@@ -1,39 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MatchmakingOverlay } from "./matchmaking-overlay";
-
-const challenges = [
-  {
-    id: "logic-puzzle",
-    title: "Logic Puzzle",
-    image: PlaceHolderImages.find((img) => img.id === "logic-puzzle"),
-    href: "/challenge/logic-puzzle",
-  },
-  {
-    id: "aptitude-sprint",
-    title: "Aptitude Sprint",
-    image: PlaceHolderImages.find((img) => img.id === "aptitude-sprint"),
-    href: "/challenge/aptitude-sprint",
-  },
-  {
-    id: "number-series",
-    title: "Number Series Duel",
-    image: PlaceHolderImages.find((img) => img.id === "number-series"),
-    href: "/challenge/number-series",
-  },
-  {
-    id: "speed-time",
-    title: "Speed & Time Trial",
-    image: PlaceHolderImages.find((img) => img.id === "speed-time"),
-    href: "/challenge/speed-time",
-  },
-];
 
 export function TodayChallenge() {
   const router = useRouter();
@@ -42,6 +15,37 @@ export function TodayChallenge() {
     title: string;
     href: string;
   } | null>(null);
+
+  useEffect(() => {
+    console.log("🚀 LOGIQ DASHBOARD V4: ALL IMAGES UPDATED");
+  }, []);
+
+  const challenges = [
+    {
+      id: "logic-puzzle",
+      title: "Logic Puzzle",
+      image: PlaceHolderImages.find((img) => img.id === "logic-puzzle"),
+      href: "/challenge/logic-puzzle",
+    },
+    {
+      id: "aptitude-sprint",
+      title: "Aptitude Sprint",
+      image: PlaceHolderImages.find((img) => img.id === "aptitude-sprint"),
+      href: "/challenge/aptitude-sprint",
+    },
+    {
+      id: "number-series",
+      title: "Number Series Duel",
+      image: PlaceHolderImages.find((img) => img.id === "number-series"),
+      href: "/challenge/number-series",
+    },
+    {
+      id: "speed-time",
+      title: "Speed & Time Trial",
+      image: PlaceHolderImages.find((img) => img.id === "speed-time"),
+      href: "/challenge/speed-time",
+    },
+  ];
 
   const handleStartChallenge = (challenge: (typeof challenges)[0]) => {
     setMatchmaking({
@@ -53,7 +57,7 @@ export function TodayChallenge() {
     // Simulate matchmaking delay
     setTimeout(() => {
       router.push(challenge.href);
-    }, 2500); // 2.5 seconds of high-fidelity pulsing
+    }, 2500);
   };
 
   return (
@@ -64,7 +68,7 @@ export function TodayChallenge() {
         isVisible={!!matchmaking}
       />
 
-      <h2 className="text-2xl font-headline text-foreground mb-4">Today's Challenges</h2>
+      <h2 className="text-2xl font-headline text-foreground mb-4">TODAY'S CHALLENGES</h2>
       <div className="grid md:grid-cols-2 gap-6">
         {challenges.map(
           (challenge) =>
@@ -74,19 +78,19 @@ export function TodayChallenge() {
                 onClick={() => handleStartChallenge(challenge)}
                 className="block group cursor-pointer"
               >
-                <Card className="overflow-hidden relative bg-white">
-                  <div className="relative h-48 w-full">
+                <Card className="overflow-hidden relative bg-white border-2 border-primary/20 shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md">
+                  <div className="relative h-48 w-full bg-white">
                     <Image
-                      src={challenge.image.imageUrl}
+                      src={`${challenge.image.imageUrl}?v=4`}
                       alt={challenge.image.description}
                       fill
-                      className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
-                      data-ai-hint={challenge.image.imageHint}
+                      className="object-contain p-8 transition-transform duration-300 group-hover:scale-105"
+                      priority={challenge.id === 'logic-puzzle'}
                     />
-                    <div className="absolute inset-0 bg-black/5" />
+                    <div className="absolute inset-0 bg-black/[0.02] pointer-events-none" />
                   </div>
-                  <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <CardTitle className="text-3xl font-headline text-black">
+                  <div className="absolute inset-0 flex flex-col justify-end p-6 pointer-events-none">
+                    <CardTitle className="text-3xl font-headline text-black drop-shadow-sm leading-tight">
                       {challenge.title}
                     </CardTitle>
                   </div>
