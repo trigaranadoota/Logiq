@@ -24,13 +24,17 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
     const isLeavingRef = useRef(false);
 
     useEffect(() => {
-        // Push a dummy state so popstate fires when back is pressed
+        // Arm the guard with an initial dummy state
         history.pushState(null, '', window.location.href);
 
         const handlePopState = () => {
             if (isLeavingRef.current) return;
-            // Back was pressed — show dialog.
-            // History has already moved back 1 step (dummy → challenge page).
+
+            // *** Key fix: immediately re-push dummy state before showing the dialog.
+            // This means even if the user mashes back multiple times rapidly, each press
+            // is intercepted — there's always a fresh dummy state in the stack.
+            history.pushState(null, '', window.location.href);
+
             setDialogOpen(true);
         };
 
@@ -38,47 +42,30 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
-    // Called when the dialog closes for ANY reason (Cancel, Escape, backdrop, or Leave)
-    const handleOpenChange = (open: boolean) => {
-        if (!open) {
-            if (!isLeavingRef.current) {
-                // User dismissed without confirming — re-arm the guard
-                history.pushState(null, '', window.location.href);
-            }
-        }
-        setDialogOpen(open);
-    };
-
-    // User confirmed they want to leave
     const handleLeave = () => {
         isLeavingRef.current = true;
-        // Replace challenge entry in history with /arena so back never returns here
+        // Replace current entry so the challenge page is gone from history
         router.replace('/arena');
-    };
-
-    // User clicked the in-app Back button
-    const handleBackClick = () => {
-        setDialogOpen(true);
     };
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <AlertDialog open={dialogOpen} onOpenChange={handleOpenChange}>
+            <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Want to leave this challenge?</AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        {/* AlertDialogCancel closes the dialog via Radix; handleOpenChange re-arms the guard */}
+                        {/* Cancel: Radix closes the dialog; dummy state already re-pushed in popstate */}
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleLeave}>Leave</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Manual Back Button */}
+            {/* In-app Back Button */}
             <div className="flex items-center justify-start w-full max-w-3xl mx-auto">
-                <Button variant="ghost" onClick={handleBackClick}>
+                <Button variant="ghost" onClick={() => setDialogOpen(true)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
