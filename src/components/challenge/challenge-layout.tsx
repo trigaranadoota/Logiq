@@ -12,28 +12,27 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 
 interface ChallengeLayoutProps {
     children: React.ReactNode;
 }
 
 export function ChallengeLayout({ children }: ChallengeLayoutProps) {
-    const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
     const isLeavingRef = useRef(false);
 
     useEffect(() => {
-        // Arm the guard with an initial dummy state
-        history.pushState(null, '', window.location.href);
+        // Push one dummy state. History is now: [..., /arena, /challenge, dummy]
+        // Current position is at "dummy".
+        history.pushState({ challengeGuard: true }, '', window.location.href);
 
         const handlePopState = () => {
             if (isLeavingRef.current) return;
 
-            // *** Key fix: immediately re-push dummy state before showing the dialog.
-            // This means even if the user mashes back multiple times rapidly, each press
-            // is intercepted — there's always a fresh dummy state in the stack.
-            history.pushState(null, '', window.location.href);
+            // User pressed back — they moved from "dummy" back to "/challenge".
+            // Immediately re-push the dummy to restore position to the top.
+            // History is always kept as: [..., /arena, /challenge, dummy]
+            history.pushState({ challengeGuard: true }, '', window.location.href);
 
             setDialogOpen(true);
         };
@@ -44,8 +43,10 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
 
     const handleLeave = () => {
         isLeavingRef.current = true;
-        // Replace current entry so the challenge page is gone from history
-        router.replace('/arena');
+        setDialogOpen(false);
+        // Go back 2 steps: dummy → /challenge → /arena
+        // History is always [..., /arena, /challenge, dummy], so -2 always lands on /arena.
+        history.go(-2);
     };
 
     return (
@@ -56,7 +57,6 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
                         <AlertDialogTitle>Want to leave this challenge?</AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        {/* Cancel: Radix closes the dialog; dummy state already re-pushed in popstate */}
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleLeave}>Leave</AlertDialogAction>
                     </AlertDialogFooter>
