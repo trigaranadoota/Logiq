@@ -42,19 +42,19 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
     fastest: 1.1,
     slowest: 5.1,
   };
-  
+
   const analyticsInput = {
-      userScore: matchData.yourScore,
-      opponentScore: matchData.opponentScore,
-      eloRatingChange: matchData.eloChange,
-      yourSpeedData: yourSpeedData,
-      opponentSpeedData: opponentSpeedData,
-      averageTime: yourStats.avgTime,
-      fastestAnswer: yourStats.fastest,
-      slowestAnswer: yourStats.slowest,
-      opponentAverageTime: opponentStats.avgTime,
-      opponentFastestAnswer: opponentStats.fastest,
-      opponentSlowestAnswer: opponentStats.slowest,
+    userScore: matchData.yourScore,
+    opponentScore: matchData.opponentScore,
+    eloRatingChange: matchData.eloChange,
+    yourSpeedData: yourSpeedData,
+    opponentSpeedData: opponentSpeedData,
+    averageTime: yourStats.avgTime,
+    fastestAnswer: yourStats.fastest,
+    slowestAnswer: yourStats.slowest,
+    opponentAverageTime: opponentStats.avgTime,
+    opponentFastestAnswer: opponentStats.fastest,
+    opponentSlowestAnswer: opponentStats.slowest,
   }
 
   const won = matchData.yourScore > matchData.opponentScore;
@@ -64,29 +64,29 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
         {/* Header: Victory/Loss */}
         <Card className="text-center p-6 md:p-8 bg-card">
-            <CardTitle className={`font-headline text-5xl mb-4 ${won ? 'text-accent' : 'text-destructive'}`}>{won ? 'Victory' : 'Defeat'}</CardTitle>
-            <div className="flex justify-around items-center max-w-lg mx-auto">
-                <div className="flex flex-col items-center space-y-2">
-                    <Avatar className="w-20 h-20 border-4 border-primary">
-                        <AvatarImage src={yourData.avatar} alt={yourData.name} />
-                        <AvatarFallback>{yourData.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <p className="font-bold text-lg">{yourData.name}</p>
-                    <p className="text-sm text-muted-foreground">ELO: {yourData.elo}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                    <p className="font-headline text-6xl">{`${matchData.yourScore} - ${matchData.opponentScore}`}</p>
-                    <p className={`font-bold text-xl ${won ? 'text-accent' : 'text-destructive'}`}>ELO {matchData.eloChange > 0 ? '+' : ''}{matchData.eloChange}</p>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                    <Avatar className="w-20 h-20">
-                        <AvatarImage src={opponentData.avatar} alt={opponentData.name} />
-                        <AvatarFallback>{opponentData.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <p className="font-bold text-lg">{opponentData.name}</p>
-                    <p className="text-sm text-muted-foreground">ELO: {opponentData.elo}</p>
-                </div>
+          <CardTitle className={`font-headline text-5xl mb-4 ${won ? 'text-accent' : 'text-destructive'}`}>{won ? 'Victory' : 'Defeat'}</CardTitle>
+          <div className="flex justify-around items-center max-w-lg mx-auto">
+            <div className="flex flex-col items-center space-y-2">
+              <Avatar className="w-20 h-20 border-4 border-primary">
+                <AvatarImage src={yourData.avatar} alt={yourData.name} />
+                <AvatarFallback>{yourData.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <p className="font-bold text-lg">{yourData.name}</p>
+              <p className="text-sm text-muted-foreground">ELO: {yourData.elo}</p>
             </div>
+            <div className="flex flex-col items-center">
+              <p className="font-headline text-6xl">{`${matchData.yourScore} - ${matchData.opponentScore}`}</p>
+              <p className={`font-bold text-xl ${won ? 'text-accent' : 'text-destructive'}`}>ELO {matchData.eloChange > 0 ? '+' : ''}{matchData.eloChange}</p>
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={opponentData.avatar} alt={opponentData.name} />
+                <AvatarFallback>{opponentData.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <p className="font-bold text-lg">{opponentData.name}</p>
+              <p className="text-sm text-muted-foreground">ELO: {opponentData.elo}</p>
+            </div>
+          </div>
         </Card>
 
         {/* AI Insights */}
@@ -120,10 +120,10 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
         </Card>
 
         <div className="flex justify-center gap-4 pt-4">
-            <Button variant="outline" className="rounded-full px-8">Rematch</Button>
-            <Button asChild className="rounded-full px-8">
-                <Link href="/">Back to Arena</Link>
-            </Button>
+          <Button variant="outline" className="rounded-full px-8">Rematch</Button>
+          <Button asChild className="rounded-full px-8">
+            <Link href="/arena">Back to Arena</Link>
+          </Button>
         </div>
       </div>
     </div>

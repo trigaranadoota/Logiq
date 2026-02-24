@@ -26,13 +26,9 @@ export default function LandingPage() {
 
     useEffect(() => {
         if (!isInitialVisit) {
-            router.push('/arena');
+            router.replace('/arena');
         } else {
             markLandingVisited();
-            // Brain appears (0s)
-            // Text flashes in (0.5s)
-            // Both stay for 1s (1.5s total)
-            // Redirect at 2.5s to be safe
             const timer = setTimeout(() => {
                 router.push('/arena');
             }, 2500);
@@ -41,7 +37,7 @@ export default function LandingPage() {
     }, [isInitialVisit, router, markLandingVisited]);
 
     if (!isInitialVisit) {
-        return <div className="min-h-screen bg-white" />;
+        return null; // Return null for a cleaner "skip"
     }
 
     return (
