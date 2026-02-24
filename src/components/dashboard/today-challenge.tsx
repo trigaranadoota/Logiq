@@ -74,16 +74,16 @@ export function TodayChallenge() {
                 onClick={() => handleStartChallenge(challenge)}
                 className="block group cursor-pointer"
               >
-                <Card className="overflow-hidden relative">
+                <Card className="overflow-hidden relative bg-white">
                   <div className="relative h-48 w-full">
                     <Image
                       src={challenge.image.imageUrl}
                       alt={challenge.image.description}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
                       data-ai-hint={challenge.image.imageHint}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-black/5" />
                   </div>
                   <div className="absolute inset-0 flex flex-col justify-end p-6">
                     <CardTitle className="text-3xl font-headline text-black">
