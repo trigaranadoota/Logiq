@@ -1,7 +1,10 @@
+import { useState } from "react";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { MatchmakingOverlay } from "./matchmaking-overlay";
 
 const challenges = [
   {
@@ -31,15 +34,45 @@ const challenges = [
 ];
 
 export function TodayChallenge() {
+  const router = useRouter();
+  const [matchmaking, setMatchmaking] = useState<{
+    gameId: string;
+    title: string;
+    href: string;
+  } | null>(null);
+
+  const handleStartChallenge = (challenge: (typeof challenges)[0]) => {
+    setMatchmaking({
+      gameId: challenge.id,
+      title: challenge.title,
+      href: challenge.href,
+    });
+
+    // Simulate matchmaking delay
+    setTimeout(() => {
+      router.push(challenge.href);
+    }, 2500); // 2.5 seconds of high-fidelity pulsing
+  };
+
   return (
     <section>
+      <MatchmakingOverlay
+        gameId={matchmaking?.gameId || ""}
+        gameTitle={matchmaking?.title || ""}
+        isVisible={!!matchmaking}
+      />
+
       <h2 className="text-2xl font-headline text-foreground mb-4">Today's Challenges</h2>
       <div className="grid md:grid-cols-2 gap-6">
         {challenges.map(
           (challenge) =>
             challenge.image && (
-              <Link key={challenge.id} href={challenge.href || "#"} className="block group">
-                <Card className="overflow-hidden relative cursor-pointer">
+              <div
+                key={challenge.id}
+                onClick={() => handleStartChallenge(challenge)}
+                className="block group cursor-pointer"
+              >
+                <Card className="overflow-hidden relative">
                   <div className="relative h-48 w-full">
                     <Image
                       src={challenge.image.imageUrl}
@@ -56,7 +89,7 @@ export function TodayChallenge() {
                     </CardTitle>
                   </div>
                 </Card>
-              </Link>
+              </div>
             )
         )}
       </div>
