@@ -44,11 +44,11 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
     const handleLeave = () => {
         isLeavingRef.current = true;
         setDialogOpen(false);
-        // Go back one step to remove the dummy state, then replace the challenge URL with Arena
+        // Go back one step to remove the dummy state, then perform a hard replace with Arena
         history.go(-1);
         setTimeout(() => {
-            router.replace('/arena');
-        }, 50); // Small timeout to ensure history move completes before replace
+            window.location.replace('/arena');
+        }, 50);
     };
 
     return (
