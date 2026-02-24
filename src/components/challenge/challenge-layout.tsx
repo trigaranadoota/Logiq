@@ -18,20 +18,19 @@ interface ChallengeLayoutProps {
 }
 
 export function ChallengeLayout({ children }: ChallengeLayoutProps) {
+    const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
     const isLeavingRef = useRef(false);
 
     useEffect(() => {
-        // Push one dummy state. History is now: [..., /arena, /challenge, dummy]
-        // Current position is at "dummy".
+        // Arm the guard by pushing a dummy state
         history.pushState({ challengeGuard: true }, '', window.location.href);
 
         const handlePopState = () => {
             if (isLeavingRef.current) return;
 
-            // User pressed back — they moved from "dummy" back to "/challenge".
-            // Immediately re-push the dummy to restore position to the top.
-            // History is always kept as: [..., /arena, /challenge, dummy]
+            // CRITICAL: Immediately re-push the dummy state before showing the dialog.
+            // This ensures that even rapid back-presses are intercepted.
             history.pushState({ challengeGuard: true }, '', window.location.href);
 
             setDialogOpen(true);
@@ -44,9 +43,8 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
     const handleLeave = () => {
         isLeavingRef.current = true;
         setDialogOpen(false);
-        // Go back 2 steps: dummy → /challenge → /arena
-        // History is always [..., /arena, /challenge, dummy], so -2 always lands on /arena.
-        history.go(-2);
+        // Replace current history entry with Arena to solve "stay on Arena" requirement
+        router.replace('/arena');
     };
 
     return (
