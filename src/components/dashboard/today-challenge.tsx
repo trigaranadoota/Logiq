@@ -86,7 +86,7 @@ export function TodayChallenge() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                   </div>
                   <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <CardTitle className="text-3xl font-headline text-white">
+                    <CardTitle className="text-3xl font-headline text-black">
                       {challenge.title}
                     </CardTitle>
                   </div>

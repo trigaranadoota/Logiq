@@ -8,9 +8,9 @@
     },
     {
       "id": "aptitude-sprint",
-      "description": "A person running on a track, representing speed and aptitude.",
-      "imageUrl": "https://images.unsplash.com/photo-1686067776426-9646eb4b5796?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzcHJpbnQlMjByYWNlfGVufDB8fHx8MTc3MDU2OTY4NHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "sprint race"
+      "description": "A geometric runner silhouette representing speed and aptitude.",
+      "imageUrl": "/challenges/aptitude-sprint.png",
+      "imageHint": "geometric runner"
     },
     {
       "id": "number-series",
