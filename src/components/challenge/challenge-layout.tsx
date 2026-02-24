@@ -29,7 +29,8 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
 
         const handlePopState = () => {
             if (isLeavingRef.current) return;
-            // Show the dialog — at this point history moved back by 1 (from dummy to real page)
+            // Back was pressed — show dialog.
+            // History has already moved back 1 step (dummy → challenge page).
             setDialogOpen(true);
         };
 
@@ -37,27 +38,39 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
-    const handleCancel = () => {
-        // Re-arm the guard by pushing the dummy state again
-        history.pushState(null, '', window.location.href);
-        setDialogOpen(false);
+    // Called when the dialog closes for ANY reason (Cancel, Escape, backdrop, or Leave)
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            if (!isLeavingRef.current) {
+                // User dismissed without confirming — re-arm the guard
+                history.pushState(null, '', window.location.href);
+            }
+        }
+        setDialogOpen(open);
     };
 
+    // User confirmed they want to leave
     const handleLeave = () => {
         isLeavingRef.current = true;
-        // Replace current history entry with /arena so back never returns to this challenge
+        // Replace challenge entry in history with /arena so back never returns here
         router.replace('/arena');
+    };
+
+    // User clicked the in-app Back button
+    const handleBackClick = () => {
+        setDialogOpen(true);
     };
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <AlertDialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleCancel(); }}>
+            <AlertDialog open={dialogOpen} onOpenChange={handleOpenChange}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Want to leave this challenge?</AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+                        {/* AlertDialogCancel closes the dialog via Radix; handleOpenChange re-arms the guard */}
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleLeave}>Leave</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -65,7 +78,7 @@ export function ChallengeLayout({ children }: ChallengeLayoutProps) {
 
             {/* Manual Back Button */}
             <div className="flex items-center justify-start w-full max-w-3xl mx-auto">
-                <Button variant="ghost" onClick={() => setDialogOpen(true)}>
+                <Button variant="ghost" onClick={handleBackClick}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
