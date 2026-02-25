@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { saveMatchResult } from "@/app/game-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SpeedChart } from "@/components/analytics/speed-chart";
-import { StatsTable } from "@/components/analytics/stats-table";
+// import { StatsTable } from "@/components/analytics/stats-table"; // Disabled if not needed
 import AiInsights from "@/components/analytics/ai-insights";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { MatchmakingOverlay } from "@/components/dashboard/matchmaking-overlay";
 import { Trophy, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function ResultsPage({ params }: { params: { id: string } }) {
@@ -18,31 +16,13 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
   const score = parseInt(searchParams.get('score') || '0');
   const isDaily = searchParams.get('daily') === 'true';
-  const matchId = searchParams.get('matchId');
 
-  const [isMatchmaking, setIsMatchmaking] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    async function persistResult() {
-      if (isSaved) return;
-
-      // For Daily Challenges, we just save the user's performance
-      // For Duels, we check against opponent (this part would ideally fetch match data from DB)
-      // For now, let's assume a win if score > 50 for Duels, or just mark as self-win
-      const won = score > 0;
-
-      await saveMatchResult({
-        gameType: params.id,
-        winnerId: isDaily ? 'self' : 'self', // Daily is always self-recorded
-        score: { user: score, total: score },
-        xpGained: isDaily ? (score / 2) : 25,
-        streakIncrement: score > 30
-      });
-      setIsSaved(true);
-    }
-    persistResult();
-  }, [params.id, isSaved, score, isDaily]);
+    // Persistence disabled as Supabase/Groq are removed
+    setIsSaved(true);
+  }, []);
 
   const gameTitle = params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
@@ -58,21 +38,21 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
   const analyticsInput = {
     userScore: score,
-    opponentScore: isDaily ? null : 17,
+    opponentScore: isDaily ? 0 : 17,
     eloRatingChange: isDaily ? 10 : 25,
     yourSpeedData: yourSpeedData,
     opponentSpeedData: isDaily ? [] : opponentSpeedData,
-    averageTime: stats.avgTime,
-    fastestAnswer: "0.8s",
-    slowestAnswer: "4.2s",
+    averageTime: parseFloat(stats.avgTime),
+    fastestAnswer: 0.8,
+    slowestAnswer: 4.2,
+    opponentAverageTime: 1.2,
+    opponentFastestAnswer: 0.9,
+    opponentSlowestAnswer: 3.5
   };
 
   const handlePlayAgain = () => {
     if (!isDaily) {
-      setIsMatchmaking(true);
-      setTimeout(() => {
-        router.push(`/arena?play=${params.id}`);
-      }, 1500);
+      router.push(`/arena?play=${params.id}`);
     } else {
       router.push(`/challenge/${params.id}`);
     }
@@ -80,11 +60,6 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="bg-background min-h-screen">
-      <MatchmakingOverlay
-        gameId={params.id}
-        gameTitle={gameTitle}
-        isVisible={isMatchmaking}
-      />
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
 
         {/* Header: Result Summary */}

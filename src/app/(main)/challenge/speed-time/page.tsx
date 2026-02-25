@@ -6,27 +6,20 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChallengeLayout } from '@/components/challenge/challenge-layout';
-import { getDailyQuestions } from '@/app/daily-actions';
 import { Progress } from '@/components/ui/progress';
+
+const MOCK_QUESTIONS = [
+    { question: "What is 15 * 6?", options: ["80", "90", "100", "110"], correctAnswer: "90" },
+    { question: "What is 125 / 5?", options: ["20", "25", "30", "35"], correctAnswer: "25" },
+    { question: "What is 14 + 27?", options: ["41", "42", "43", "44"], correctAnswer: "41" }
+];
 
 export default function SpeedTimePage() {
     const router = useRouter();
-    const [questions, setQuestions] = useState<any[]>([]);
+    const [questions, setQuestions] = useState(MOCK_QUESTIONS);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(900);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function init() {
-            const res = await getDailyQuestions('speed-time');
-            if (res.questions) {
-                setQuestions(res.questions);
-            }
-            setLoading(false);
-        }
-        init();
-    }, []);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -44,22 +37,11 @@ export default function SpeedTimePage() {
         }
 
         if (currentIndex + 1 >= questions.length) {
-            setCurrentIndex(0); // Loop for daily challenges
+            setCurrentIndex(0); // Loop for mock trial
         } else {
             setCurrentIndex(prev => prev + 1);
         }
     };
-
-    if (loading) {
-        return (
-            <ChallengeLayout>
-                <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <Zap className="w-16 h-16 text-primary animate-pulse mb-4" />
-                    <h2 className="text-2xl font-headline tracking-widest uppercase italic animate-pulse">Calculating Trial Data...</h2>
-                </div>
-            </ChallengeLayout>
-        );
-    }
 
     const currentQ = questions[currentIndex];
 
@@ -72,7 +54,7 @@ export default function SpeedTimePage() {
                         <span className="text-3xl font-headline italic tracking-tighter">{timeLeft}s</span>
                     </div>
                     <div className="text-center">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Speed & Accuracy Trial</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Mock Speed Trial</span>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2 text-primary">
@@ -88,12 +70,12 @@ export default function SpeedTimePage() {
                     <CardHeader className="bg-slate-50 border-b border-primary/5 p-8">
                         <div className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Problem {currentIndex + 1}</div>
                         <CardTitle className="text-3xl font-headline leading-tight text-slate-900">
-                            {currentQ?.question}
+                            {currentQ.question}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 space-y-8 text-slate-700">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                            {currentQ?.options?.map((option: string) => (
+                            {currentQ.options.map((option: string) => (
                                 <Button
                                     key={option}
                                     variant="outline"
@@ -110,4 +92,5 @@ export default function SpeedTimePage() {
         </ChallengeLayout>
     );
 }
+
 

@@ -61,14 +61,14 @@ export default function LandingPage() {
                         asChild
                         className="py-6 rounded-2xl bg-primary text-primary-foreground font-headline text-lg shadow-lg hover:shadow-xl transition-all"
                     >
-                        <Link href="/signup">Get Started</Link>
+                        <Link href="/arena">Play Now</Link>
                     </Button>
                     <Button
                         asChild
                         variant="outline"
                         className="py-6 rounded-2xl border-2 font-headline text-lg hover:bg-slate-50 transition-all"
                     >
-                        <Link href="/login">Sign In</Link>
+                        <Link href="/arena">Quick Start</Link>
                     </Button>
                 </div>
             </div>

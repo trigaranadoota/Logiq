@@ -2,24 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MatchmakingOverlay } from "./matchmaking-overlay";
-import { joinQueue, leaveQueue, findMatch } from "@/app/matchmaking-actions";
 
 export function TodayChallenge() {
   const router = useRouter();
-  const [matchmaking, setMatchmaking] = useState<{
-    gameId: string;
-    title: string;
-    href: string;
-  } | null>(null);
-
-  useEffect(() => {
-    console.log("🚀 LOGIQ DASHBOARD V4: ALL IMAGES UPDATED");
-  }, []);
 
   const challenges = [
     {
@@ -48,44 +36,12 @@ export function TodayChallenge() {
     },
   ];
 
-  const handleStartChallenge = async (challenge: (typeof challenges)[0]) => {
-    setMatchmaking({
-      gameId: challenge.id,
-      title: challenge.title,
-      href: challenge.href,
-    });
-
-    const { error } = await joinQueue(challenge.id);
-    if (error) {
-      console.error("Failed to join queue:", error);
-      setMatchmaking(null);
-      return;
-    }
-
-    // Polling for an opponent
-    const pollInterval = setInterval(async () => {
-      const result = await findMatch(challenge.id);
-      if (result.success && result.matchId) {
-        clearInterval(pollInterval);
-        router.push(`${challenge.href}?matchId=${result.matchId}`);
-      }
-    }, 3000);
-
-    // Return cleanup to stop polling and leave queue if needed
-    return () => {
-      clearInterval(pollInterval);
-      leaveQueue();
-    };
+  const handleStartChallenge = (challenge: (typeof challenges)[0]) => {
+    router.push(challenge.href);
   };
 
   return (
     <section>
-      <MatchmakingOverlay
-        gameId={matchmaking?.gameId || ""}
-        gameTitle={matchmaking?.title || ""}
-        isVisible={!!matchmaking}
-      />
-
       <h2 className="text-2xl font-headline text-foreground mb-4">TODAY'S CHALLENGES</h2>
       <div className="grid md:grid-cols-2 gap-6">
         {challenges.map(
@@ -120,4 +76,3 @@ export function TodayChallenge() {
     </section>
   );
 }
-
