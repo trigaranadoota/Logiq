@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { saveMatchResult } from "@/app/game-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,9 +11,15 @@ import AiInsights from "@/components/analytics/ai-insights";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { MatchmakingOverlay } from "@/components/dashboard/matchmaking-overlay";
+import { Trophy, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function ResultsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const score = parseInt(searchParams.get('score') || '0');
+  const isDaily = searchParams.get('daily') === 'true';
+  const matchId = searchParams.get('matchId');
+
   const [isMatchmaking, setIsMatchmaking] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -21,156 +27,150 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
     async function persistResult() {
       if (isSaved) return;
 
-      const won = 20 > 17; // matchData.yourScore > matchData.opponentScore
+      // For Daily Challenges, we just save the user's performance
+      // For Duels, we check against opponent (this part would ideally fetch match data from DB)
+      // For now, let's assume a win if score > 50 for Duels, or just mark as self-win
+      const won = score > 0;
+
       await saveMatchResult({
         gameType: params.id,
-        winnerId: won ? 'self' : null, // Handle 'self' logic in server action or use actual ID
-        score: { user: 20, opponent: 17 },
-        xpGained: won ? 25 : 5,
-        streakIncrement: won
+        winnerId: isDaily ? 'self' : 'self', // Daily is always self-recorded
+        score: { user: score, total: score },
+        xpGained: isDaily ? (score / 2) : 25,
+        streakIncrement: score > 30
       });
       setIsSaved(true);
     }
     persistResult();
-  }, [params.id, isSaved]);
+  }, [params.id, isSaved, score, isDaily]);
 
-  // Map descriptive ID to numeric seed for consistent random data
-  const idSeedMap: Record<string, number> = {
-    "logic-puzzle": 1,
-    "aptitude-sprint": 2,
-    "number-series": 3,
-    "speed-time": 4,
-  };
-  const numericId = idSeedMap[params.id] || 1;
+  const gameTitle = params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-  // Mock data for the duel results
-  const yourData = {
-    name: 'You',
-    avatar: 'https://picsum.photos/seed/you/150/150',
-    elo: 1224,
-  };
+  // Mocked analytics data based on real score
+  const yourSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.random() * 20 + 80 + (score / 10)));
+  const opponentSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.random() * 15 + 85));
 
-  const opponentData = {
-    name: 'Alex_G',
-    avatar: 'https://picsum.photos/seed/opponent/150/150',
-    elo: 1195,
-  };
-
-  const matchData = {
-    yourScore: 20,
-    opponentScore: 17,
-    eloChange: 24,
-  };
-
-  // Generate consistent random data based on duel ID
-  const yourSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.sin((i + numericId) * 0.5) * 10 + 90));
-  const opponentSpeedData = Array.from({ length: 60 }, (_, i) => Math.floor(Math.cos((i + numericId) * 0.4) * 12 + 88));
-
-  const yourStats = {
-    avgTime: 2.5,
-    fastest: 0.8,
-    slowest: 4.2,
-  };
-
-  const opponentStats = {
-    avgTime: 2.8,
-    fastest: 1.1,
-    slowest: 5.1,
+  const stats = {
+    avgTime: (60 / Math.max(1, score / 10)).toFixed(1),
+    fastest: "0.8s",
+    slowest: "4.2s"
   };
 
   const analyticsInput = {
-    userScore: matchData.yourScore,
-    opponentScore: matchData.opponentScore,
-    eloRatingChange: matchData.eloChange,
+    userScore: score,
+    opponentScore: isDaily ? null : 17,
+    eloRatingChange: isDaily ? 10 : 25,
     yourSpeedData: yourSpeedData,
-    opponentSpeedData: opponentSpeedData,
-    averageTime: yourStats.avgTime,
-    fastestAnswer: yourStats.fastest,
-    slowestAnswer: yourStats.slowest,
-    opponentAverageTime: opponentStats.avgTime,
-    opponentFastestAnswer: opponentStats.fastest,
-    opponentSlowestAnswer: opponentStats.slowest,
-  }
+    opponentSpeedData: isDaily ? [] : opponentSpeedData,
+    averageTime: stats.avgTime,
+    fastestAnswer: "0.8s",
+    slowestAnswer: "4.2s",
+  };
 
-  const won = matchData.yourScore > matchData.opponentScore;
-
-  const handleRematch = () => {
-    setIsMatchmaking(true);
-    // Simulate matchmaking delay before navigating back to the challenge
-    setTimeout(() => {
+  const handlePlayAgain = () => {
+    if (!isDaily) {
+      setIsMatchmaking(true);
+      setTimeout(() => {
+        router.push(`/arena?play=${params.id}`);
+      }, 1500);
+    } else {
       router.push(`/challenge/${params.id}`);
-    }, 2500);
+    }
   };
 
   return (
-    <div className="bg-background">
+    <div className="bg-background min-h-screen">
       <MatchmakingOverlay
         gameId={params.id}
-        gameTitle={params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+        gameTitle={gameTitle}
         isVisible={isMatchmaking}
       />
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
-        {/* Header: Victory/Loss */}
-        <Card className="text-center p-6 md:p-8 bg-card">
-          <CardTitle className={`font-headline text-5xl mb-4 ${won ? 'text-accent' : 'text-destructive'}`}>{won ? 'Victory' : 'Defeat'}</CardTitle>
-          <div className="flex justify-around items-center max-w-lg mx-auto">
-            <div className="flex flex-col items-center space-y-2">
-              <Avatar className="w-20 h-20 border-4 border-primary">
-                <AvatarImage src={yourData.avatar} alt={yourData.name} />
-                <AvatarFallback>{yourData.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <p className="font-bold text-lg">{yourData.name}</p>
-              <p className="text-sm text-muted-foreground">ELO: {yourData.elo}</p>
+
+        {/* Header: Result Summary */}
+        <Card className="text-center p-8 bg-white shadow-xl rounded-3xl border-none overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-primary"></div>
+
+          {isDaily ? (
+            <div className="space-y-4 pt-4">
+              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+              <CardTitle className="font-headline text-5xl text-slate-900">CHALLENGE COMPLETE</CardTitle>
+              <p className="text-muted-foreground uppercase tracking-widest font-bold text-sm">Global 24-Hour Rotation Set</p>
+
+              <div className="flex justify-center items-baseline gap-2 pt-4">
+                <span className="text-7xl font-headline italic tracking-tighter text-primary">{score}</span>
+                <span className="text-xl font-headline text-slate-400">PTS</span>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <p className="font-headline text-6xl">{`${matchData.yourScore} - ${matchData.opponentScore}`}</p>
-              <p className={`font-bold text-xl ${won ? 'text-accent' : 'text-destructive'}`}>ELO {matchData.eloChange > 0 ? '+' : ''}{matchData.eloChange}</p>
+          ) : (
+            <div className="space-y-6 pt-4">
+              <Trophy className="w-16 h-16 text-primary mx-auto animate-bounce" />
+              <CardTitle className="font-headline text-6xl text-primary">VICTORY</CardTitle>
+
+              <div className="flex justify-center items-center gap-12 pt-4">
+                <div className="flex flex-col items-center gap-2">
+                  <Avatar className="w-20 h-20 border-4 border-primary/20">
+                    <AvatarFallback className="bg-primary/10 text-primary">YOU</AvatarFallback>
+                  </Avatar>
+                  <span className="text-4xl font-headline italic">{score}</span>
+                </div>
+                <div className="text-slate-300 font-headline text-4xl italic">VS</div>
+                <div className="flex flex-col items-center gap-2">
+                  <Avatar className="w-20 h-20 border-4 border-slate-100 opacity-40">
+                    <AvatarFallback>AI</AvatarFallback>
+                  </Avatar>
+                  <span className="text-4xl font-headline italic text-slate-300">--</span>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col items-center space-y-2">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={opponentData.avatar} alt={opponentData.name} />
-                <AvatarFallback>{opponentData.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <p className="font-bold text-lg">{opponentData.name}</p>
-              <p className="text-sm text-muted-foreground">ELO: {opponentData.elo}</p>
-            </div>
-          </div>
+          )}
         </Card>
 
         {/* AI Insights */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl tracking-wide">AI-Powered Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AiInsights analyticsInput={analyticsInput} />
-          </CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="border-none shadow-lg rounded-3xl bg-white overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+              <CardTitle className="font-headline text-2xl tracking-wide flex items-center gap-2">
+                <ArrowRight className="w-5 h-5 text-primary" />
+                Performance Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-2xl">
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1">Avg Speed</p>
+                  <p className="text-3xl font-headline italic">{stats.avgTime}s</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl">
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1">XP Gained</p>
+                  <p className="text-3xl font-headline italic text-primary">+{isDaily ? (score / 2) : 25}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg rounded-3xl bg-white overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+              <CardTitle className="font-headline text-2xl tracking-wide">Coach Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <AiInsights analyticsInput={analyticsInput} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts & Graphs */}
+        <Card className="border-none shadow-lg rounded-3xl bg-white p-6">
+          <CardTitle className="font-headline text-2xl tracking-wide mb-6">Speed Analysis</CardTitle>
+          <SpeedChart yourData={yourSpeedData} opponentData={isDaily ? [] : opponentSpeedData} />
         </Card>
 
-        {/* Performance Graph */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl tracking-wide">Speed Comparison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SpeedChart yourData={yourSpeedData} opponentData={opponentSpeedData} />
-          </CardContent>
-        </Card>
-
-        {/* Stat Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl tracking-wide">Detailed Stats</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StatsTable yourStats={yourStats} opponentStats={opponentStats} />
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-center gap-4 pt-4">
-          <Button onClick={handleRematch} variant="outline" className="rounded-full px-8">Rematch</Button>
-          <Button asChild className="rounded-full px-8">
-            <Link href="/arena">Back to Arena</Link>
+        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+          <Button onClick={handlePlayAgain} size="lg" className="rounded-full px-12 h-16 text-lg font-headline italic tracking-widest uppercase">
+            {isDaily ? 'Retry Challenge' : 'Find New Match'}
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-12 h-16 text-lg font-headline italic tracking-widest uppercase border-2">
+            <Link href="/arena">Exit to Arena</Link>
           </Button>
         </div>
       </div>
