@@ -79,22 +79,6 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                {/* Action Buttons - Appear last */}
-                <div className="flex flex-col gap-3 w-64 mt-12 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-1000 fill-mode-both">
-                    <Button
-                        asChild
-                        className="py-6 rounded-2xl bg-primary text-primary-foreground font-headline text-lg shadow-lg hover:shadow-xl transition-all"
-                    >
-                        <Link href="/arena">Play Now</Link>
-                    </Button>
-                    <Button
-                        asChild
-                        variant="outline"
-                        className="py-6 rounded-2xl border-2 font-headline text-lg hover:bg-slate-50 transition-all"
-                    >
-                        <Link href="/arena">Quick Start</Link>
-                    </Button>
-                </div>
             </div>
         </div>
     );
