@@ -14,7 +14,7 @@ export default function SpeedTimePage() {
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(60);
+    const [timeLeft, setTimeLeft] = useState(900);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -82,7 +82,7 @@ export default function SpeedTimePage() {
                     </div>
                 </div>
 
-                <Progress value={(timeLeft / 60) * 100} className="h-1.5" />
+                <Progress value={(timeLeft / 900) * 100} className="h-1.5" />
 
                 <Card className="border-none shadow-2xl overflow-hidden rounded-3xl bg-white">
                     <CardHeader className="bg-slate-50 border-b border-primary/5 p-8">
