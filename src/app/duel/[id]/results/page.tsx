@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { saveMatchResult } from "@/app/game-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SpeedChart } from "@/components/analytics/speed-chart";
@@ -14,6 +15,24 @@ import { MatchmakingOverlay } from "@/components/dashboard/matchmaking-overlay";
 export default function ResultsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isMatchmaking, setIsMatchmaking] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    async function persistResult() {
+      if (isSaved) return;
+
+      const won = 20 > 17; // matchData.yourScore > matchData.opponentScore
+      await saveMatchResult({
+        gameType: params.id,
+        winnerId: won ? 'self' : null, // Handle 'self' logic in server action or use actual ID
+        score: { user: 20, opponent: 17 },
+        xpGained: won ? 25 : 5,
+        streakIncrement: won
+      });
+      setIsSaved(true);
+    }
+    persistResult();
+  }, [params.id, isSaved]);
 
   // Map descriptive ID to numeric seed for consistent random data
   const idSeedMap: Record<string, number> = {

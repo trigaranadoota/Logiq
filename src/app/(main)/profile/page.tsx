@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { loggedInUser } from '@/lib/data';
+import { useProfile } from '@/hooks/use-profile';
+import type { User } from '@/lib/types';
 import {
     Share2,
     Plus,
@@ -43,7 +44,6 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { User } from '@/lib/types';
 
 // Dummy data for the chart
 const performanceData = [
@@ -56,9 +56,17 @@ const performanceData = [
     { week: 'W7', xp: 900 },
 ];
 
-
 export default function ProfilePage() {
-    const user = loggedInUser as Required<User>; // Assume all fields are present for the demo
+    const { user: rawUser, loading } = useProfile();
+    const user = rawUser as Required<User>;
+
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center">Loading Profile...</div>;
+    }
+
+    if (!rawUser) {
+        return <div className="min-h-screen flex items-center justify-center">Please log in to view your profile.</div>;
+    }
 
     const ratingIcons: { [key: string]: React.ElementType } = {
         'Aptitude': BrainCircuit,
@@ -154,7 +162,7 @@ export default function ProfilePage() {
                 <div>
                     <h2 className="text-2xl font-headline tracking-tight uppercase italic mb-4 px-2">Ratings</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {user.ratings.map(rating => {
+                        {user.ratings.map((rating: { category: string; rating: number }) => {
                             const Icon = ratingIcons[rating.category] || Star;
                             return (
                                 <Card key={rating.category} className="p-4 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 hover:shadow-lg shadow-md">
@@ -231,7 +239,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {user.recentMatches.map(match => (
+                            {user.recentMatches.map((match: any) => (
                                 <div key={match.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
                                     <Avatar>
                                         <AvatarImage src={match.opponent.avatarUrl} alt={match.opponent.name} />

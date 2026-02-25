@@ -7,6 +7,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MatchmakingOverlay } from "./matchmaking-overlay";
+import { joinQueue, leaveQueue, findMatch } from "@/app/matchmaking-actions";
 
 export function TodayChallenge() {
   const router = useRouter();
@@ -47,17 +48,34 @@ export function TodayChallenge() {
     },
   ];
 
-  const handleStartChallenge = (challenge: (typeof challenges)[0]) => {
+  const handleStartChallenge = async (challenge: (typeof challenges)[0]) => {
     setMatchmaking({
       gameId: challenge.id,
       title: challenge.title,
       href: challenge.href,
     });
 
-    // Simulate matchmaking delay
-    setTimeout(() => {
-      router.push(challenge.href);
-    }, 2500);
+    const { error } = await joinQueue(challenge.id);
+    if (error) {
+      console.error("Failed to join queue:", error);
+      setMatchmaking(null);
+      return;
+    }
+
+    // Polling for an opponent
+    const pollInterval = setInterval(async () => {
+      const result = await findMatch(challenge.id);
+      if (result.success && result.matchId) {
+        clearInterval(pollInterval);
+        router.push(`${challenge.href}?matchId=${result.matchId}`);
+      }
+    }, 3000);
+
+    // Return cleanup to stop polling and leave queue if needed
+    return () => {
+      clearInterval(pollInterval);
+      leaveQueue();
+    };
   };
 
   return (
