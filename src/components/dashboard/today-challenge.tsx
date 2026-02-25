@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Card, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useRouter } from "next/navigation";
+import { MatchmakingOverlay } from "./matchmaking-overlay";
 
 export function TodayChallenge() {
   const router = useRouter();
+  const [matchmaking, setMatchmaking] = useState<{
+    gameId: string;
+    title: string;
+    href: string;
+  } | null>(null);
 
   const challenges = [
     {
@@ -37,11 +43,27 @@ export function TodayChallenge() {
   ];
 
   const handleStartChallenge = (challenge: (typeof challenges)[0]) => {
-    router.push(challenge.href);
+    setMatchmaking({
+      gameId: challenge.id,
+      title: challenge.title,
+      href: challenge.href,
+    });
+
+    // Mock delay to show the matchmaking animation
+    setTimeout(() => {
+      router.push(challenge.href);
+      setMatchmaking(null);
+    }, 2500);
   };
 
   return (
     <section>
+      <MatchmakingOverlay
+        gameId={matchmaking?.gameId || ""}
+        gameTitle={matchmaking?.title || ""}
+        isVisible={!!matchmaking}
+      />
+
       <h2 className="text-2xl font-headline text-foreground mb-4">TODAY'S CHALLENGES</h2>
       <div className="grid md:grid-cols-2 gap-6">
         {challenges.map(
