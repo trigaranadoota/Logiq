@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Zap, Timer, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
