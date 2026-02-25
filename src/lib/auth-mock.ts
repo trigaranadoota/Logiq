@@ -22,6 +22,12 @@ export const authMock = {
       localStorage.setItem("logiq_user", JSON.stringify(MOCK_USER));
     }
   },
+  signUp: () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("logiq_auth_token", "mock_token_123");
+      localStorage.setItem("logiq_user", JSON.stringify(MOCK_USER));
+    }
+  },
   signOut: () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("logiq_auth_token");
