@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { authMock } from '@/lib/auth-mock';
+
 export default function LandingPage() {
     const { hasVisitedLanding, markLandingVisited } = useNavigation();
     const router = useRouter();
@@ -26,11 +28,19 @@ export default function LandingPage() {
 
     useEffect(() => {
         if (!isInitialVisit) {
-            router.replace('/arena');
+            if (authMock.isLoggedIn()) {
+                router.replace('/arena');
+            } else {
+                router.replace('/login');
+            }
         } else {
             markLandingVisited();
             const timer = setTimeout(() => {
-                router.push('/arena');
+                if (authMock.isLoggedIn()) {
+                    router.push('/arena');
+                } else {
+                    router.push('/login');
+                }
             }, 2500);
             return () => clearTimeout(timer);
         }
