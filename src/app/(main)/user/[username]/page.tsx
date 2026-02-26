@@ -25,7 +25,9 @@ import {
     Zap,
     BrainCircuit,
     Bot,
-    ArrowLeft
+    ArrowLeft,
+    UserPlus,
+    UserCheck
 } from 'lucide-react';
 import {
     LineChart,
@@ -138,6 +140,11 @@ export default function UserProfilePage() {
     const router = useRouter();
     const username = (params.username as string).replace('@', ''); // Handle @ in username
     const user = userProfiles[username] as Required<User>;
+    const [isFollowing, setIsFollowing] = React.useState(false);
+
+    const handleFollow = () => {
+        setIsFollowing(!isFollowing);
+    };
 
     if (!user) {
         return (
@@ -239,8 +246,20 @@ export default function UserProfilePage() {
                             <Button className="shadow-md">
                                 <Swords className="mr-2 h-4 w-4" /> Challenge
                             </Button>
-                            <Button variant="secondary" className="shadow-md">
-                                <Plus className="mr-2 h-4 w-4" /> Connect
+                            <Button
+                                variant={isFollowing ? "secondary" : "default"}
+                                className="shadow-md min-w-[100px]"
+                                onClick={handleFollow}
+                            >
+                                {isFollowing ? (
+                                    <>
+                                        <UserCheck className="mr-2 h-4 w-4" /> Following
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserPlus className="mr-2 h-4 w-4" /> Follow
+                                    </>
+                                )}
                             </Button>
                             <Tooltip>
                                 <TooltipTrigger asChild>

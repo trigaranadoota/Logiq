@@ -26,7 +26,9 @@ import {
     Zap,
     BrainCircuit,
     Bot,
-    FilePenLine
+    FilePenLine,
+    UserPlus,
+    UserCheck
 } from 'lucide-react';
 import {
     LineChart,
@@ -80,6 +82,11 @@ const performanceData = [
 export default function ProfilePage() {
     const { user: rawUser, loading } = useProfile();
     const user = rawUser as Required<User>;
+    const [isFollowing, setIsFollowing] = React.useState(false);
+
+    const handleFollow = () => {
+        setIsFollowing(!isFollowing);
+    };
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center">Loading Profile...</div>;
@@ -170,8 +177,20 @@ export default function ProfilePage() {
                             <Button className="shadow-md">
                                 <Swords className="mr-2 h-4 w-4" /> Challenge
                             </Button>
-                            <Button variant="secondary" className="shadow-md">
-                                <Plus className="mr-2 h-4 w-4" /> Connect
+                            <Button
+                                variant={isFollowing ? "secondary" : "default"}
+                                className="shadow-md min-w-[100px]"
+                                onClick={handleFollow}
+                            >
+                                {isFollowing ? (
+                                    <>
+                                        <UserCheck className="mr-2 h-4 w-4" /> Following
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserPlus className="mr-2 h-4 w-4" /> Follow
+                                    </>
+                                )}
                             </Button>
                             <Tooltip>
                                 <TooltipTrigger asChild>
