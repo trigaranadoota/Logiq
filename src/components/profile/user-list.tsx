@@ -4,6 +4,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 export type UserListItem = {
     id: string;
@@ -24,7 +25,7 @@ export function UserList({ users, onToggleFollow }: UserListProps) {
             <div className="space-y-4">
                 {users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between group">
-                        <div className="flex items-center space-x-3">
+                        <Link href={`/user/${user.username.replace('@', '')}`} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                             <Avatar className="h-10 w-10 border border-border">
                                 <AvatarImage src={user.avatarUrl} alt={user.name} />
                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -37,7 +38,7 @@ export function UserList({ users, onToggleFollow }: UserListProps) {
                                     {user.username}
                                 </span>
                             </div>
-                        </div>
+                        </Link>
                         <Button
                             variant={user.isFollowing ? "secondary" : "default"}
                             size="sm"

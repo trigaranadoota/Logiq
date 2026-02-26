@@ -44,6 +44,26 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { UserList, type UserListItem } from "@/components/profile/user-list";
+
+// Mock data for followers/following in user profile
+const MOCK_FOLLOWERS: UserListItem[] = [
+    { id: 'f1', name: 'Alice Chen', username: '@alice_dev', avatarUrl: 'https://picsum.photos/seed/alice/100/100', isFollowing: true },
+    { id: 'f2', name: 'Bob Smith', username: '@bob_codes', avatarUrl: 'https://picsum.photos/seed/bob/100/100', isFollowing: false },
+    { id: 'f3', name: 'Charlie Day', username: '@charlie_run', avatarUrl: 'https://picsum.photos/seed/charlie/100/100', isFollowing: true },
+];
+
+const MOCK_FOLLOWING: UserListItem[] = [
+    { id: 'f1', name: 'Alice Chen', username: '@alice_dev', avatarUrl: 'https://picsum.photos/seed/alice/100/100', isFollowing: true },
+    { id: 'f3', name: 'Charlie Day', username: '@charlie_run', avatarUrl: 'https://picsum.photos/seed/charlie/100/100', isFollowing: true },
+];
 
 // Mock data for user profiles
 const userProfiles: { [key: string]: User } = {
@@ -182,14 +202,35 @@ export default function UserProfilePage() {
                         </Badge>
 
                         <div className="flex gap-8 mt-4 text-sm">
-                            <div className="flex flex-col">
-                                <span className="font-headline text-2xl tracking-tight">{user.following}</span>
-                                <span className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest leading-none">Following</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-headline text-2xl tracking-tight">{user.followers}</span>
-                                <span className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest leading-none">Followers</span>
-                            </div>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <div className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+                                        <span className="font-headline text-2xl tracking-tight">{user.following}</span>
+                                        <span className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest leading-none">Following</span>
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle className="font-headline uppercase italic">Following</DialogTitle>
+                                    </DialogHeader>
+                                    <UserList users={MOCK_FOLLOWING} />
+                                </DialogContent>
+                            </Dialog>
+
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <div className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+                                        <span className="font-headline text-2xl tracking-tight">{user.followers}</span>
+                                        <span className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest leading-none">Followers</span>
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle className="font-headline uppercase italic">Followers</DialogTitle>
+                                    </DialogHeader>
+                                    <UserList users={MOCK_FOLLOWERS} />
+                                </DialogContent>
+                            </Dialog>
                         </div>
 
                         <p className="mt-4 max-w-md mx-auto text-muted-foreground text-sm">{user.goals}</p>
