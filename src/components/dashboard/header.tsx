@@ -22,6 +22,13 @@ export function DashboardHeader() {
                     </div>
                     <span className="font-bold text-sm text-foreground">5,430</span>
                 </div>
+                <Separator orientation="vertical" className="h-5" />
+                <Link href="/saved-questions" className="flex items-center space-x-2 p-1 pr-2 hover:bg-accent rounded-full transition-colors group">
+                    <div className="w-7 h-7 rounded-full bg-secondary/20 flex items-center justify-center group-hover:bg-secondary/30 transition-colors">
+                        <span className="font-bold text-xs text-secondary-foreground">★</span>
+                    </div>
+                    <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">Saved</span>
+                </Link>
             </div>
         </header>
     );
