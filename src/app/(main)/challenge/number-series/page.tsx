@@ -7,19 +7,31 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChallengeLayout } from '@/components/challenge/challenge-layout';
 import { Progress } from '@/components/ui/progress';
-
-const MOCK_SERIES = [
-    { series: "2, 4, 8, 16, ?", options: ["20", "24", "32", "64"], correctAnswer: "32" },
-    { series: "1, 4, 9, 16, ?", options: ["20", "25", "30", "36"], correctAnswer: "25" },
-    { series: "10, 20, 40, 80, ?", options: ["100", "120", "160", "200"], correctAnswer: "160" }
-];
+import { generateQuestion, GeneratedQuestion } from '@/lib/ai-client';
 
 export default function NumberSeriesPage() {
     const router = useRouter();
-    const [questions, setQuestions] = useState(MOCK_SERIES);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentQ, setCurrentQ] = useState<GeneratedQuestion | null>(null);
+    const [loading, setLoading] = useState(true);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(900);
+
+    const loadNextQuestion = async () => {
+        setLoading(true);
+        try {
+            // Asking our new AI integration to create a Number Series question
+            const result = await generateQuestion('Number Series', 'medium');
+            setCurrentQ(result);
+        } catch (error) {
+            console.error("Failed to load question:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadNextQuestion(); // Load the first question when the page loads
+    }, []);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -31,19 +43,15 @@ export default function NumberSeriesPage() {
     }, [timeLeft, router, score]);
 
     const handleAnswer = (option: string) => {
-        const currentQ = questions[currentIndex];
-        if (option === currentQ.correctAnswer) {
+        if (!currentQ) return;
+        
+        if (option === currentQ.correct_answer) {
             setScore(prev => prev + 10);
         }
-
-        if (currentIndex + 1 >= questions.length) {
-            setCurrentIndex(0); // Repeat mock data for now
-        } else {
-            setCurrentIndex(prev => prev + 1);
-        }
+        
+        // Load the next question immediately after answering
+        loadNextQuestion();
     };
-
-    const currentQ = questions[currentIndex];
 
     return (
         <ChallengeLayout>
@@ -54,7 +62,7 @@ export default function NumberSeriesPage() {
                         <span className="text-3xl font-headline italic tracking-tighter">{timeLeft}s</span>
                     </div>
                     <div className="text-center">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Mock Rank Mode</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">AI Generated Mode</span>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2 text-primary">
@@ -66,31 +74,38 @@ export default function NumberSeriesPage() {
 
                 <Progress value={(timeLeft / 900) * 100} className="h-1.5" />
 
-                <Card className="border-none shadow-2xl overflow-hidden rounded-3xl bg-white">
-                    <CardHeader className="bg-slate-50 border-b border-primary/5 p-8">
-                        <CardTitle className="text-4xl font-headline text-center tracking-widest text-slate-900">
-                            {currentQ.series}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8 space-y-8">
-                        <p className="text-center text-muted-foreground font-bold uppercase tracking-widest text-xs">Complete the sequence</p>
-                        <div className="grid grid-cols-2 gap-4">
-                            {currentQ.options.map((option: string) => (
-                                <Button
-                                    key={option}
-                                    variant="outline"
-                                    onClick={() => handleAnswer(option)}
-                                    className="py-12 rounded-2xl border-2 border-slate-100 hover:border-primary hover:bg-primary/5 text-3xl font-headline transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg text-slate-700 hover:text-primary h-auto"
-                                >
-                                    {option}
-                                </Button>
-                            ))}
+                <Card className="border-none shadow-2xl overflow-hidden rounded-3xl bg-white min-h-[400px]">
+                    {loading || !currentQ ? (
+                        <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-muted-foreground font-headline tracking-widest uppercase">The AI is thinking...</p>
                         </div>
-                    </CardContent>
+                    ) : (
+                        <>
+                            <CardHeader className="bg-slate-50 border-b border-primary/5 p-8">
+                                <CardTitle className="text-4xl font-headline text-center tracking-widest text-slate-900">
+                                    {currentQ.question_text}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-8 space-y-8">
+                                <p className="text-center text-muted-foreground font-bold uppercase tracking-widest text-xs">Complete the sequence</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {currentQ.options.map((option: string) => (
+                                        <Button
+                                            key={option}
+                                            variant="outline"
+                                            onClick={() => handleAnswer(option)}
+                                            className="py-12 rounded-2xl border-2 border-slate-100 hover:border-primary hover:bg-primary/5 text-3xl font-headline transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg text-slate-700 hover:text-primary h-auto"
+                                        >
+                                            {option}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </>
+                    )}
                 </Card>
             </div>
         </ChallengeLayout>
     );
 }
-
-

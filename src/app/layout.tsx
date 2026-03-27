@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 };
 
 import { NavigationProvider } from '@/components/providers/navigation-provider';
+import { UserProvider } from '@/components/providers/user-context';
 
 export default function RootLayout({
   children,
@@ -25,9 +26,11 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <NavigationProvider>
-          {children}
-        </NavigationProvider>
+        <UserProvider>
+          <NavigationProvider>
+            {children}
+          </NavigationProvider>
+        </UserProvider>
         <Toaster />
       </body>
     </html>

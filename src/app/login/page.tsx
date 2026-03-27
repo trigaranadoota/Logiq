@@ -9,28 +9,54 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Chrome, ArrowRight } from 'lucide-react'
-import { authMock } from '@/lib/auth-mock'
+import { createClient } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 export default function LoginPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const supabase = createClient()
+    const { toast } = useToast()
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-        // Simulate a slight network delay
-        setTimeout(() => {
-            authMock.signIn()
+
+        const formData = new FormData(e.currentTarget)
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) {
+            toast({
+                title: "Login Error",
+                description: error.message,
+                variant: "destructive",
+            })
+            setLoading(false)
+        } else {
             router.push('/arena')
-        }, 1000)
+        }
     }
 
-    const handleGoogleLogin = () => {
+    const handleGoogleLogin = async () => {
         setLoading(true)
-        setTimeout(() => {
-            authMock.signIn()
-            router.push('/arena')
-        }, 800)
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        })
+
+        if (error) {
+            console.error('Login error:', error.message)
+            setLoading(false)
+        }
+        // Redirect happens automatically with signInWithOAuth
     }
 
     return (

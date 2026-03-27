@@ -9,28 +9,67 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Chrome, ArrowRight, User } from 'lucide-react'
-import { authMock } from '@/lib/auth-mock'
+import { createClient } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 export default function SignupPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const supabase = createClient()
+    const { toast } = useToast()
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-        // Simulate a slight network delay
-        setTimeout(() => {
-            authMock.signUp()
-            router.push('/arena')
-        }, 1000)
+
+        const formData = new FormData(e.currentTarget)
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+        const username = formData.get('username') as string
+
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: username,
+                }
+            }
+        })
+
+        if (error) {
+            toast({
+                title: "Signup Error",
+                description: error.message,
+                variant: "destructive",
+            })
+            setLoading(false)
+        } else {
+            toast({
+                title: "Success",
+                description: "Check your email to confirm your account!",
+            })
+            router.push('/login')
+        }
     }
 
-    const handleGoogleSignup = () => {
+    const handleGoogleSignup = async () => {
         setLoading(true)
-        setTimeout(() => {
-            authMock.signUp()
-            router.push('/arena')
-        }, 800)
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        })
+
+        if (error) {
+            toast({
+                title: "Login Error",
+                description: error.message,
+                variant: "destructive",
+            })
+            setLoading(false)
+        }
     }
 
     return (
