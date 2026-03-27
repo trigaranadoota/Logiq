@@ -23,7 +23,7 @@ export default function SignupPage() {
         setLoading(true)
 
         const formData = new FormData(e.currentTarget)
-        const email = formData.get('email') as string
+        const email = (formData.get('email') as string).trim()
         const password = formData.get('password') as string
         const username = formData.get('username') as string
 

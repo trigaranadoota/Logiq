@@ -13,17 +13,20 @@ export default function NumberSeriesPage() {
     const router = useRouter();
     const [currentQ, setCurrentQ] = useState<GeneratedQuestion | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(900);
 
     const loadNextQuestion = async () => {
         setLoading(true);
+        setError(null);
         try {
             // Asking our new AI integration to create a Number Series question
             const result = await generateQuestion('Number Series', 'medium');
             setCurrentQ(result);
-        } catch (error) {
-            console.error("Failed to load question:", error);
+        } catch (err: any) {
+            console.error("Failed to load question:", err);
+            setError(err.message || "AI failed to respond.");
         } finally {
             setLoading(false);
         }
@@ -75,10 +78,20 @@ export default function NumberSeriesPage() {
                 <Progress value={(timeLeft / 900) * 100} className="h-1.5" />
 
                 <Card className="border-none shadow-2xl overflow-hidden rounded-3xl bg-white min-h-[400px]">
-                    {loading || !currentQ ? (
+                    {loading ? (
                         <div className="flex flex-col items-center justify-center p-20 space-y-4">
                             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                             <p className="text-muted-foreground font-headline tracking-widest uppercase">The AI is thinking...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex flex-col items-center justify-center p-20 space-y-4 text-center">
+                            <p className="text-red-500 font-bold text-xl">⚠️ Error generating question</p>
+                            <p className="text-slate-600 mb-4">{error}</p>
+                            <Button onClick={loadNextQuestion} variant="outline">Try Again</Button>
+                        </div>
+                    ) : !currentQ ? (
+                        <div className="flex flex-col items-center justify-center p-20">
+                            <p className="text-red-500">Failed to load question data.</p>
                         </div>
                     ) : (
                         <>
